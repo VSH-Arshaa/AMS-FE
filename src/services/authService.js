@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const login = (data) => {
-  return axios.post("/api/auth/login", data);
+  return axios.post("http://localhost:7000/authorization/login", data);
 };
 
 export const requestPasswordReset = (data) => {

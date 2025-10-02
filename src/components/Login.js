@@ -9,40 +9,54 @@ function validatePasswordRules(pw) {
 }
 
 export default function Login() {
-  const [employeeId, setEmployeeId] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // client-side validation
-    const newErrors = {};
-    if (!employeeId.trim()) newErrors.employeeId = "Employee ID is required";
-    if (!password) newErrors.password = "Password is required";
-    const rules = validatePasswordRules(password);
-    if (!rules.minLen) newErrors.password = "Password must be at least 8 characters";
-    if (!rules.special) newErrors.password = "Password must contain at least one special character";
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length) return;
+  const newErrors = {};
+  if (!username.trim()) newErrors.username = "Employee ID is required";
+  if (!password) newErrors.password = "Password is required";
 
-    setLoading(true);
-    try {
-      const res = await login({ employeeId, password });
-      // expected response: { token: "...", role: "ADMIN" }
-      localStorage.setItem("token", res.data.token || "");
-      localStorage.setItem("role", res.data.role || "EMPLOYEE");
-      navigate("/dashboard");
-    } catch (err) {
-      console.error(err);
-      const msg = err?.response?.data?.message || err?.response?.data || err.message || "Login failed";
-      setErrors({ submit: msg });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Validate Password
+  //const rules = validatePasswordRules(password);
+  //   if (!rules.minLen) newErrors.password = "Password must be at least 8 characters";
+  //   if (!rules.special) newErrors.password = "Password must contain at least one special character";
+
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length) return;
+
+  setLoading(true);
+  try {
+    const res = await login({ username, password });
+    // response: { token, username, roles: [{ roleId, roleName }], userId }
+
+    const { token, roles, userId } = res.data;
+    const roleName = roles && roles.length > 0 ? roles[0].roleName : "EMPLOYEE";
+
+    // Save in localStorage
+    localStorage.setItem("token", token || "");
+    localStorage.setItem("role", roleName);
+    localStorage.setItem("userId", userId);
+
+    navigate("/dashboard");
+  } catch (err) {
+    console.error(err);
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err.message ||
+      "Login failed";
+    setErrors({ submit: msg });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="container">
@@ -52,8 +66,8 @@ export default function Login() {
         <form onSubmit={handleSubmit} noValidate>
           <div>
             <label>Employee ID</label><br />
-            <input value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} placeholder="e.g. EMP1001" />
-            {errors.employeeId && <small className="error">{errors.employeeId}</small>}
+            <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. EMP1001" />
+            {errors.username && <small className="error">{errors.username}</small>}
           </div>
 
           <div>
@@ -76,3 +90,5 @@ export default function Login() {
     </div>
   );
 }
+
+    
