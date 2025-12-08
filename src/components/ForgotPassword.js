@@ -14,7 +14,7 @@ export default function ForgotPassword() {
 
     setLoading(true);
     try {
-      await requestPasswordReset({ email }); // backend should send OTP to email
+      await requestPasswordReset({ email }); 
       setStatus("OTP sent to your email. Redirecting...");
       setTimeout(() => navigate("/reset-password"), 2000);
     } catch (err) {
