@@ -11,7 +11,6 @@ export default function Dashboard() {
         <p>Welcome! Your role: <strong>{role}</strong></p>
 
         <div style={{ marginTop: 12 }}>
-          {/* Quick links to role panels */}
           <Link to="/admin">Admin Panel</Link> |{" "}
           <Link to="/hr">HR Panel</Link> |{" "}
           <Link to="/manager">Manager Panel</Link> |{" "}

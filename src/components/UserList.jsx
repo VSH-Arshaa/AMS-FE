@@ -15,7 +15,7 @@ export default function UserList() {
     fetchUsers();
     return () => {
       objectUrlsRef.current.forEach((u) => {
-        try { URL.revokeObjectURL(u); } catch(e){/*ignore*/ }
+        try { URL.revokeObjectURL(u); } catch(e){}
       });
     };
   }, []);
@@ -55,7 +55,6 @@ export default function UserList() {
       try {
         const resp = await fetch(url, fetchOptions);
         if (!resp.ok) {
-          console.warn("Image fetch failed", url, resp.status);
           return { id: user.id, objectUrl: null };
         }
         const blob = await resp.blob();
@@ -63,8 +62,6 @@ export default function UserList() {
         objectUrlsRef.current.push(objectUrl);
         return { id: user.id, objectUrl };
       } catch (err) {
-        
-        console.warn("Image fetch error", url, err);
         return { id: user.id, objectUrl: null };
       }
     });

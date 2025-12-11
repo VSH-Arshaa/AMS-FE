@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   BrowserRouter,
@@ -19,30 +18,41 @@ import UserList from "./components/UserList";
 import UserForm from "./components/UserForm";
 import { ToastProvider } from "./components/ToastProvider";
 
+import RoleLogin from "./components/RoleLogin";
+
 function PrivateRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const storedRole = localStorage.getItem("role") || "";
 
   if (!token) return <Navigate to="/login" replace />;
 
-  if (allowedRoles && allowedRoles.length && !allowedRoles.includes(role)) {
-    return (
-      <div className="container">
-        <h3>Access denied</h3>
-        <p>Your role: {role}</p>
-      </div>
-    );
+  if (allowedRoles && allowedRoles.length) {
+    const normalizedAllowed = allowedRoles.map((r) => (r || "").toString().toUpperCase());
+    const userRole = storedRole.toString().toUpperCase();
+    if (!normalizedAllowed.includes(userRole)) {
+      return (
+        <div className="container">
+          <h3>Access denied</h3>
+          <p>Your role: {storedRole || "N/A"}</p>
+        </div>
+      );
+    }
   }
 
   return children;
 }
+
 function Layout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const hideNavbar = ["/login", "/forgot-password", "/reset-password"].includes(
-    location.pathname
-  );
+  const hideNavbar = [
+    "/login",
+    "/role-login",
+    "/login-old",
+    "/forgot-password",
+    "/reset-password",
+  ].includes(location.pathname);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -93,14 +103,29 @@ function UsersPage() {
     </div>
   );
 }
+
 export default function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                localStorage.getItem("token") ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route path="/login" element={<RoleLogin />} />
+
+            <Route path="/login-old" element={<Login />} />
+
+            <Route path="/role-login" element={<RoleLogin />} />
+
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
 
